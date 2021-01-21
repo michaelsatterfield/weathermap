@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" rel="stylesheet" />
+    <title>Weather Map</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+</head>
+<style>
+    #navBar {
+        font-size: 2em;
+    }
+    .nav-item {
+        color: white;
+        margin-left: 2em;
+    }
+    .place{
+        min-height: 2.3em;
+
+    }
+    .location_lookup{
+        margin-left: 2em;
+    }
+    .card {
+        /*border: 1px solid;*/
+    }
+    .card-title {
+        border-bottom: solid 1px lightgoldenrodyellow;
+        background-color: lemonchiffon;
+        display: block;
+    }
+
+    #map {
+        justify-content: center;
+        min-height: 60em;
+        width: 90%;
+        height: 40%;
+        margin-left: 5em;
+
+    }
+
+
+
+</style>
+<body>
+
+
+
+<nav class=" navbar  navbar-li bg-primary" id="navBar">
+    <a class="nav-item" href="" >Your Local Weather Page</a>
+</nav>
+<br>
+
+<br>
+
+
+
+<div class="card-group">
+    <div class="card">
+
+        <div class="card-body">
+            <h5 class="card-title" id="cityName"></h5>
+<!--            <img id='image1'>-->
+            <p class="card-text" id="temp1"></p>
+            <p class="card-text" id="description0"><small class="text-muted"></small></p>
+        </div>
+    </div>
+</div>
+
+<!--****************************five day forecast*************-->
+
+
+
+<div class="  card-group justify-content-around">
+    <div class=" col-lg-2 col-sm-12 ">
+
+        <div class="card-body ">
+            <h5 class="card-title" id="date1"></h5>
+            <p class="card-text" id="highLow1"></p>
+            <img id='image1'>
+            <p class="card-text" id="feelsLike1"></p>
+            <p class="card-text" id="description1"></p>
+            <p class="card-text" id="humidity1"></p>
+            <p class="card-text" id="wind1"></p>
+        </div>
+    </div>
+    <div class="col-lg-2 col-sm-12">
+
+
+
+        <div class="card-body">
+            <h5 class="card-title" id="date2"></h5>
+            <p class="card-text" id="highLow2"></p>
+            <img id='image2'>
+            <p class="card-text" id="feelsLike1"></p>
+            <p class="card-text" id="description2"></p>
+            <p class="card-text" id="humidity2"></p>
+            <p class="card-text" id="wind2"></p>
+        </div>
+    </div>
+    <div class="col-lg-2 col-sm-12">
+
+        <div class="card-body">
+            <h5 class="card-title" id="date3"></h5>
+            <p class="card-text" id="highLow3"></p>
+            <img id='image3'>
+
+            <p class="card-text" id="feelsLike1"></p>
+            <p class="card-text" id="description3"></p>
+            <p class="card-text" id="humidity3"></p>
+            <p class="card-text" id="wind3"></p>
+        </div>
+    </div>
+    <div class="col-lg-2 col-sm-12">
+
+        <div class="card-body">
+            <h5 class="card-title" id="date4"></h5>
+            <p class="card-text" id="highLow4"></p>
+            <img id='image4'>
+            <p class="card-text" id="feelsLike1"></p>
+            <p class="card-text" id="description4"></p>
+            <p class="card-text" id="humidity4"></p>
+            <p class="card-text" id="wind4"></p>
+        </div>
+    </div>
+    <div class="col-lg-2 col-sm-12">
+
+        <div class="card-body">
+            <h5 class="card-title"id="date5"></h5>
+            <p class="card-text" id="highLow5"></p>
+            <img id='image5'>
+            <p class="card-text" id="feelsLike1"></p>
+            <p class="card-text" id="description5"></p>
+            <p class="card-text" id="humidity5"></p>
+            <p class="card-text" id="wind5"></p>
+        </div>
+
+
+
+    </div>
+
+</div>
+<div class="d-flex flex-column image-fluid" id="map"></div>
+
+
+
+</div>
+
+
+
+<div class="mapBox"  id="map"></div>
+
+<!--</main>-->
+
+
+
+
+
+
+<!--Jquery and BS-->
+<script src="js/jquery.js"></script>
+
+
+<!--KEY-->
+<script src="js/keys.js"></script>
+<!--JS-->
+<script>
+    (function($) {
+
+
+        $(document).ready(function () {
+            mapboxgl.accessToken = MAPBOX_TOKEN;
+
+
+                var tileset = 'mapbox.streets';
+                var map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v8',
+                    center: [-95.7, 37.1], // starting position
+                    zoom: 3 // starting zoom
+                });
+
+                map.on('load', function () {
+
+                    map.addSource('aerisweather-radar', {
+                        "type": 'raster',
+                        "tiles": [
+                            'https://maps1.aerisapi.com/radar/{z}/{x}/{y}/current.png',
+                            'https://maps2.aerisapi.com/radar/{z}/{x}/{y}/current.png',
+                            'https://maps3.aerisapi.com/radar/{z}/{x}/{y}/current.png',
+                            'https://maps4.aerisapi.com/radar/{z}/{x}/{y}/current.png'
+                        ],
+                        "clientId": Aeris_id,
+                        "clientKey": Aeris_Key,
+                        "tileSize": 256,
+                        "attribution": "<a href='https://www.aerisweather.com/'>AerisWeather</a>"
+
+                    });
+                    map.addLayer({
+                        "id": "radar-tiles",
+                        "type": "raster",
+                        "source": "aerisweather-radar",
+                        "minzoom": 0,
+                        "maxzoom":22
+                    });
+                });
+            let marker = new mapboxgl.Marker()
+                .setLngLat([-98.4916, 29.4241])
+                .addTo(map)
+                .setDraggable(true)
+
+
+
+            var geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                marker: {
+                    draggable: true,
+                    color: 'orange'
+                },
+                mapboxgl: mapboxgl
+            });
+            console.log(geocoder)
+
+            map.addControl(geocoder);
+
+
+
+
+            let searchLong = 0
+            let searchLat = 0
+
+            geocoder.on('results', function (results) {
+                console.log(results);
+                searchLong = results.features[0].center[0]
+                searchLat = results.features[0].center[1]
+                // searchLat = results.request.query.proximity[1]
+                console.log(searchLat)
+                console.log(searchLong)
+            })
+
+
+
+
+      var API_call = "https://api.openweathermap.org/data/2.5/forecast";
+
+
+      // let latitude = 29.424349;
+      //
+      // let longitude = -98.491142;
+
+      function onDragEnd(lon, lat) {
+          let lngLat = marker.getLngLat();
+          $.get(API_call, {
+              APPID: WEATHER_APPID,
+              // lat: searchLat,
+              // lon: searchLong,
+              lat: lngLat.lat,
+              lon: lngLat.lng,
+              exclude: "minutely,hourly",
+              units: "imperial"
+
+
+          }).done(function (data) {
+              console.log(data)
+              //************draggable code********
+              // map.flyTo({center: [searchLong, searchLat]})
+              map.flyTo({center: [lngLat.lng, lngLat.lat]})
+              map.set
+
+
+              $('#cityName').html(
+                  data.city.name
+              )
+
+
+              $('#temp1').html(
+                  "The Temperature is " + data.list[0].main.temp.toFixed(1) + '°F'
+              )
+
+              $('#description0').html(
+                  "The weather is " + data.list[0].weather[0].description
+              )
+
+//*************************dates********************************
+
+              $('#date1').html(
+                  "Date: " + data.list[0].dt_txt.substring(0, data.list[0].dt_txt.indexOf(' '))
+              )
+              $('#date2').html(
+                  "Date: " + data.list[8].dt_txt.substring(0, data.list[0].dt_txt.indexOf(' '))
+              )
+              $('#date3').html(
+                  "Date: " + data.list[16].dt_txt.substring(0, data.list[0].dt_txt.indexOf(' '))
+              )
+              $('#date4').html(
+                  "Date: " + data.list[24].dt_txt.substring(0, data.list[0].dt_txt.indexOf(' '))
+              )
+              $('#date5').html(
+                  "Date: " + data.list[32].dt_txt.substring(0, data.list[0].dt_txt.indexOf(' '))
+              )
+
+
+//*********************high/low temp**********************************
+
+              $('#highLow1').html(
+                  data.list[0].main.temp_min.toFixed(1) + '°F' + '/' + data.list[0].main.temp_max.toFixed(1) + '°F'
+              )
+              $('#highLow2').html(
+                  data.list[8].main.temp_min.toFixed(1) + '°F' + '/' + data.list[0].main.temp_max.toFixed(1) + '°F'
+              )
+              $('#highLow3').html(
+                  data.list[16].main.temp_min.toFixed(1) + '°F' + '/' + data.list[0].main.temp_max.toFixed(1) + '°F'
+              )
+              $('#highLow4').html(
+                  data.list[24].main.temp_min.toFixed(1) + '°F' + '/' + data.list[0].main.temp_max.toFixed(1) + '°F'
+              )
+              $('#highLow5').html(
+                  data.list[32].main.temp_min.toFixed(1) + '°F' + '/' + data.list[0].main.temp_max.toFixed(1) + '°F'
+              )
+
+
+//******************description*******************************************
+
+              $('#description1').html(
+                  "Condition : " + data.list[0].weather[0].description
+              )
+              $('#description2').html(
+                  "Condition : " + data.list[8].weather[0].description
+              )
+              $('#description3').html(
+                  "Condition : " + data.list[16].weather[0].description
+              )
+              $('#description4').html(
+                  "Condition : " + data.list[24].weather[0].description
+              )
+              $('#description5').html(
+                  "Condition : " + data.list[32].weather[0].description
+              )
+//*******************humidity**********************
+
+              $('#humidity1').html(
+                  "Humidity : " + data.list[0].main.humidity + '%'
+              )
+              $('#humidity2').html(
+                  "Humidity : " + data.list[8].main.humidity + '%'
+              )
+              $('#humidity3').html(
+                  "Humidity : " + data.list[16].main.humidity + '%'
+              )
+              $('#humidity4').html(
+                  "Humidity : " + data.list[24].main.humidity + '%'
+              )
+              $('#humidity5').html(
+                  "Humidity : " + data.list[32].main.humidity + '%'
+              )
+
+//*******************Wind**********************
+
+              $('#wind1').html(
+                  "Wind Speed: " + data.list[0].wind.speed + 'MPH'
+              )
+              $('#wind2').html(
+                  "Wind Speed: " + data.list[8].wind.speed + 'MPH'
+              )
+              $('#wind3').html(
+                  "Wind Speed: " + data.list[16].wind.speed + 'MPH'
+              )
+              $('#wind4').html(
+                  "Wind Speed: " + data.list[24].wind.speed + 'MPH'
+              )
+              $('#wind5').html(
+                  "Wind Speed: " + data.list[32].wind.speed + 'MPH'
+              )
+
+              //*************image icon************
+
+              $('#image1').attr(
+                  "src", "http://openweathermap.org/img/w/" + data.list[0].weather[0].icon + ".png"
+              )
+              $('#image2').attr(
+                  "src", "http://openweathermap.org/img/w/" + data.list[8].weather[0].icon + ".png"
+              )
+              $('#image3').attr(
+                  "src", "http://openweathermap.org/img/w/" + data.list[16].weather[0].icon + ".png"
+              )
+              $('#image4').attr(
+                  "src", "http://openweathermap.org/img/w/" + data.list[24].weather[0].icon + ".png"
+              )
+              $('#image5').attr(
+                  "src", "http://openweathermap.org/img/w/" + data.list[32].weather[0].icon + ".png"
+              )
+
+              $('#lookUpCity').click(function () {
+                  $()
+              })
+
+
+              $(document).ready(function () {
+                  $('.mabBox').hover(
+                      function () {
+                          $(this).css('background-color', '#FF0');
+                      },
+                      function () {
+                          $(this).css('background-color', '#FFF');
+                      }
+                  );
+                  $('')
+
+
+              });
+
+
+          });
+
+
+      }
+
+      map.on('load', onDragEnd)
+      marker.on('dragend', onDragEnd);
+
+  }
+
+
+    )
+
+
+    })(jQuery);
+
+
+
+
+
+</script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+<link
+        rel="stylesheet"
+        href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
+        type="text/css"
+/>
+<!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<style>
+    #geocoder-container > div {
+        min-width: 50%;
+        margin-left: 25%;
+    }
+</style>
+<div id="map"></div>
+
+<script>
+
+
+</script>
+
+
+
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+
+</body>
+</html>
